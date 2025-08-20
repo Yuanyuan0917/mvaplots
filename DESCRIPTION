@@ -22,7 +22,8 @@ Imports:
     rlang,
     ggtext,
     tibble,
-    data.table
+    data.table,
+    magrittr
 Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
