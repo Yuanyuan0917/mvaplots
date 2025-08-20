@@ -18,12 +18,14 @@ Imports:
     dplyr,
     tidyr,
     patchwork,
-    viridis,
+    viridisLite,
     rlang,
     ggtext,
     tibble,
     data.table,
-    magrittr
+    magrittr,
+    utils,
+    stats
 Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
