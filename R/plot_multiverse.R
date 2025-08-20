@@ -18,7 +18,8 @@
 #' @export
 #' @import ggplot2
 #' @importFrom patchwork wrap_plots
-#' @importFrom dplyr mutate %>% desc
+#' @importFrom dplyr mutate desc
+#' @importFrom magrittr %>%
 #' @importFrom data.table :=
 #' @importFrom stats as.formula coef density lm
 #' @importFrom utils read.csv
