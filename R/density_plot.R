@@ -17,6 +17,7 @@
 #' generate_density_plot(df, "edif", "Excess Fatalities")
 #'
 #' @export
+#' @import ggplot2
 #' @importFrom dplyr mutate %>% desc
 #' @importFrom data.table :=
 #' @importFrom stats as.formula coef density lm
