@@ -18,10 +18,14 @@
 #' generate_heatmap_strips(df, "edif", strip_vars, variable_labels)
 #'
 #' @export
-#' @importFrom dplyr mutate %>% desc
-#' @importFrom data.table :=
-#' @importFrom stats as.formula coef density lm
-#' @importFrom utils read.csv
+#' @import ggplot2
+#' @importFrom dplyr mutate %>% desc filter rowwise ungroup arrange pull case_when group_by summarise bind_rows count left_join distinct
+#' @importFrom tidyr complete
+#' @importFrom tibble enframe tibble
+#' @importFrom rlang sym
+#' @importFrom ggtext element_markdown
+#' @importFrom viridis viridis
+#' @importFrom stats as.formula coef lm
 generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labels) {
   n_bins <- 20
   x_min <- min(data[[outcome_var]], na.rm = TRUE)
