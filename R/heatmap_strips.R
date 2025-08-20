@@ -25,7 +25,7 @@
 #' @importFrom tibble enframe tibble
 #' @importFrom rlang sym
 #' @importFrom ggtext element_markdown
-#' @importFrom viridis viridis
+#' @importFrom viridisLite viridis
 #' @importFrom stats as.formula coef lm
 generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labels) {
   n_bins <- 20
