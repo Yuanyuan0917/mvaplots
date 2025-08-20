@@ -19,7 +19,8 @@
 #'
 #' @export
 #' @import ggplot2
-#' @importFrom dplyr mutate %>% desc filter rowwise ungroup arrange pull case_when group_by summarise bind_rows count left_join distinct
+#' @importFrom dplyr mutate desc filter rowwise ungroup arrange pull case_when group_by summarise bind_rows count left_join distinct
+#' @importFrom magrittr %>%
 #' @importFrom tidyr complete
 #' @importFrom tibble enframe tibble
 #' @importFrom rlang sym
