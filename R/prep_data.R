@@ -12,6 +12,9 @@ library(ggtext)
 #' @param use_case Either "hurricane" or "beauty".
 #' @return A list with data and metadata
 #' @export
+#' @import ggplot2
+#' @importFrom dplyr mutate
+#' @importFrom magrittr %>%
 prep_data <- function(use_case) {
   if (use_case == "hurricane") {
     # --- Load and Prepare Data ---
