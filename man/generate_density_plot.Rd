@@ -23,8 +23,9 @@ estimated outcomes with the distribution of statistically significant outcomes
 in a multiverse analysis.
 }
 \examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 prep <- prep_data("hurricane")
 df <- prep[[1]]
 generate_density_plot(df, "edif", "Excess Fatalities")
-
+\dontshow{\}) # examplesIf}
 }

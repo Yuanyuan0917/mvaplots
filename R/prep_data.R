@@ -1,20 +1,26 @@
-# --- Required Packages ---
-library(ggplot2)
-library(dplyr)
-library(tidyr)
-library(patchwork)
-library(viridis)
-library(rlang)
-library(forcats)
-library(ggtext)
-
-#' Prepare data for multiverse analysis plots
-#' @param use_case Either "hurricane" or "beauty".
-#' @return A list with data and metadata
+#' Prepare multiverse analysis data
+#'
+#' Loads and prepares datasets for different use cases ("hurricane" or "beauty").
+#'
+#' @param use_case Character. Either "hurricane" or "beauty".
+#'
+#' @return A list containing:
+#' \itemize{
+#'   \item df: The prepared dataframe.
+#'   \item outcome_var: The outcome variable name.
+#'   \item outcome_var_label: The display label for the outcome variable.
+#'   \item strip_vars: The decision variable names.
+#'   \item variable_labels: The decision variable labels.
+#' }
+#'
+#' @examples
+#' prep <- prep_data("hurricane")
+#' str(prep)
+#'
 #' @export
-#' @import ggplot2
 #' @importFrom dplyr mutate
 #' @importFrom magrittr %>%
+#' @importFrom utils read.csv
 prep_data <- function(use_case) {
   if (use_case == "hurricane") {
     # --- Load and Prepare Data ---

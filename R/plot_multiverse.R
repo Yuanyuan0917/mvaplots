@@ -16,13 +16,6 @@
 #' }
 #'
 #' @export
-#' @import ggplot2
-#' @importFrom patchwork wrap_plots
-#' @importFrom dplyr mutate desc
-#' @importFrom magrittr %>%
-#' @importFrom data.table :=
-#' @importFrom stats as.formula coef density lm
-#' @importFrom utils read.csv
 plot_multiverse <- function(use_case = "hurricane", output_path = NULL) {
   prep <- prep_data(use_case = use_case)
   df <- prep[[1]]

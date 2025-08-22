@@ -18,15 +18,6 @@
 #' generate_heatmap_strips(df, "edif", strip_vars, variable_labels)
 #'
 #' @export
-#' @import ggplot2
-#' @importFrom dplyr mutate desc filter rowwise ungroup arrange pull case_when group_by summarise bind_rows count left_join distinct
-#' @importFrom magrittr %>%
-#' @importFrom tidyr complete
-#' @importFrom tibble enframe tibble
-#' @importFrom rlang sym
-#' @importFrom ggtext element_markdown
-#' @importFrom viridis viridis
-#' @importFrom stats as.formula coef lm
 generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labels) {
   n_bins <- 20
   x_min <- min(data[[outcome_var]], na.rm = TRUE)
@@ -93,7 +84,7 @@ generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labe
   return(heatmap_strips)
 }
 
-# --- Helper: generate one heatmap strip (not exported) ---
+#' @keywords internal
 generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color, var_label, label_lookup, common_xlim) {
   var_sym <- rlang::sym(varname)
   out_sym <- rlang::sym(outcome_var)
@@ -128,6 +119,8 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
       !!var_sym := factor(level_name, levels = levels(heatmap_data[[varname]]))
     )
 
+  ref_level <- levels(df[[varname]])[1]
+
   ggplot2::ggplot(heatmap_data, ggplot2::aes(y = !!var_sym, fill = prop)) +
     ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax, ymin = as.numeric(!!var_sym) - 0.5,
                                     ymax = as.numeric(!!var_sym) + 0.5), color = NA) +
@@ -138,9 +131,10 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
     ggplot2::scale_x_continuous(limits = common_xlim, expand = c(0, 0)) +
     ggplot2::scale_y_discrete(
       labels = function(labs) {
-        labs <- ifelse(labs == "label", paste0("**", var_label, "**"),
-                       ifelse(labs == levels(df[[varname]])[1], paste0("*", labs, "*"), labs))
-        return(labs)
+        ifelse(
+          labs == "label", paste0("**", var_label, "**"),
+          ifelse(labs == ref_level, paste0("*", labs, "*"), labs)
+        )
       },
       expand = c(0, 0)
     ) +
@@ -151,21 +145,23 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
       axis.text.x = ggplot2::element_blank(),
       axis.ticks.x = ggplot2::element_blank(),
       axis.title.y = ggplot2::element_blank(),
-      ggtext::element_markdown(),
+      axis.text.y = ggtext::element_markdown(),
       panel.grid = ggplot2::element_blank(),
       plot.margin = ggplot2::margin(0, 20, 0, 10)
     )
 }
 
-# --- Helper: add label row to heatmap data (not exported) ---
+#' @keywords internal
 add_variable_label_row <- function(data, varname, base_color, var_label) {
   orig_levels <- levels(data[[varname]])
   new_levels <- rev(c("label", orig_levels))
   data[[varname]] <- factor(data[[varname]], levels = new_levels)
-  label_row <- data.frame(outcome_bin = NA, prop = NA,
-                          xmin = min(data$xmin, na.rm = TRUE),
-                          xmax = max(data$xmax, na.rm = TRUE),
-                          level = 0)
+  label_row <- data.frame(
+    outcome_bin = NA,
+    prop = NA,
+    xmin = min(data$xmin, na.rm = TRUE),
+    xmax = max(data$xmax, na.rm = TRUE)
+  )
   label_row[[varname]] <- factor("label", levels = new_levels)
   for (col in setdiff(names(data), names(label_row))) label_row[[col]] <- NA
   dplyr::bind_rows(label_row[, names(data)], data)

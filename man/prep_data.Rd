@@ -2,16 +2,28 @@
 % Please edit documentation in R/prep_data.R
 \name{prep_data}
 \alias{prep_data}
-\title{Prepare data for multiverse analysis plots}
+\title{Prepare multiverse analysis data}
 \usage{
 prep_data(use_case)
 }
 \arguments{
-\item{use_case}{Either "hurricane" or "beauty".}
+\item{use_case}{Character. Either "hurricane" or "beauty".}
 }
 \value{
-A list with data and metadata
+A list containing:
+\itemize{
+\item df: The prepared dataframe.
+\item outcome_var: The outcome variable name.
+\item outcome_var_label: The display label for the outcome variable.
+\item strip_vars: The decision variable names.
+\item variable_labels: The decision variable labels.
+}
 }
 \description{
-Prepare data for multiverse analysis plots
+Loads and prepares datasets for different use cases ("hurricane" or "beauty").
+}
+\examples{
+prep <- prep_data("hurricane")
+str(prep)
+
 }
