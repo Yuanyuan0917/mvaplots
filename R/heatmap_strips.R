@@ -79,7 +79,7 @@ generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labe
   # Generate strips
   heatmap_strips <- Map(function(varname, base_color) {
     var_label <- variable_labels[[varname]]
-    generate_heatmap_strip(data, varname, outcome_var, breaks, base_color, var_label, label_lookup, common_xlim, x_min, x_max)
+    generate_heatmap_strip(data, varname, outcome_var, breaks, base_color, var_label, label_lookup, common_xlim, x_min, common_xlim[2])
   }, varname = strip_vars, base_color = base_colors)
 
   return(heatmap_strips)
