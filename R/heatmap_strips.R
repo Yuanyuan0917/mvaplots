@@ -90,7 +90,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
   out_sym <- rlang::sym(outcome_var)
   x_min <- min(df[[outcome_var]], na.rm = TRUE)
   x_max <- max(df[[outcome_var]], na.rm = TRUE)
-  x_label_pos <- x_max + 0.01 * (x_max - x_min)
+  x_label_pos <- common_xlim[2] - 0.01 * (x_max - x_min)
 
   heatmap_data <- df %>%
     dplyr::mutate(outcome_bin = cut(!!out_sym, breaks = breaks, include.lowest = TRUE)) %>%
