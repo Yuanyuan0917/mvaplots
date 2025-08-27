@@ -122,7 +122,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
 }
 
 #' @keywords internal
-add_variable_label_row <- function(data, varname, base_color, var_label) {
+add_variable_label_row <- function(data, varname, base_color, var_label, x_min, x_max) {
   orig_levels <- levels(data[[varname]])
   new_levels <- rev(c("label", orig_levels))
   data[[varname]] <- factor(data[[varname]], levels = new_levels)
@@ -131,11 +131,11 @@ add_variable_label_row <- function(data, varname, base_color, var_label) {
     outcome_bin = NA,
     prop = NA,
     xmin = x_min,
-    xmax = x_max,
-    level = 0
+    xmax = x_max
   )
 
   label_row[[varname]] <- factor("label", levels = new_levels)
   for (col in setdiff(names(data), names(label_row))) label_row[[col]] <- NA
-  bind_rows(label_row[, names(data)], data)
+  dplyr::bind_rows(label_row[, names(data)], data)
 }
+
