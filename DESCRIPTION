@@ -1,6 +1,6 @@
 Package: mvaplots
 Title: Multiverse Analysis Visualization Plots
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: 
     person("Yuanyuan", "Qu", email = "Yuanyuan.Qu@campus.lmu.de", role = c("aut", "cre"))
 Description: Provides functions to visualize multiverse analysis results. 
