@@ -131,7 +131,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
                        ggplot2::aes(y = !!var_sym, label = label_text),
                        x = x_label_pos, inherit.aes = FALSE, hjust = 0, size = 3, parse = TRUE, na.rm = TRUE) +
     ggplot2::scale_fill_gradient(low = "white", high = base_color, na.value = NA) +
-    ggplot2::scale_x_continuous(limits = common_xlim, expand = c(0, 0)) +
+    ggplot2::scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
     ggplot2::scale_y_discrete(
       labels = function(labs) {
         ifelse(
@@ -164,7 +164,8 @@ add_variable_label_row <- function(data, varname, base_color, var_label, x_min, 
     outcome_bin = NA,
     prop = NA,
     xmin = x_min,
-    xmax = x_max
+    xmax = x_max,
+    level = 0
   )
 
   label_row[[varname]] <- factor("label", levels = new_levels)
