@@ -48,24 +48,6 @@ generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labe
     data[[var]] <- factor(data[[var]], levels = unique(c(ref_level, coef_sub)))
   }
 
-  # Label lookup for coefficients
-  label_lookup <- tidy_coefs %>%
-    dplyr::mutate(
-      rounded = round(estimate, 2),
-      label_text = dplyr::case_when(
-        rounded > 0 ~ paste0("'+", formatC(rounded, format = "f", digits = 2), "'"),
-        rounded < 0 ~ paste0("'", formatC(rounded, format = "f", digits = 2), "'"),
-        TRUE ~ "'0.00'"
-      )
-    ) %>% dplyr::select(var, level, label_text)
-
-  ref_labels <- lapply(strip_vars, function(var) {
-    base_level <- levels(data[[var]])[1]
-    tibble::tibble(var = var, level = base_level, label_text = "Ref.")
-  }) %>% dplyr::bind_rows()
-
-  label_lookup <- dplyr::bind_rows(label_lookup, ref_labels)
-
   # Order variables by influence
   influence_scores <- tidy_coefs %>%
     dplyr::group_by(var) %>%
@@ -78,19 +60,19 @@ generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labe
   # Generate strips
   heatmap_strips <- Map(function(varname, base_color) {
     var_label <- variable_labels[[varname]]
-    generate_heatmap_strip(data, varname, outcome_var, breaks, base_color, var_label, label_lookup, common_xlim)
+    generate_heatmap_strip(data, varname, outcome_var, breaks, base_color, var_label, common_xlim)
   }, varname = strip_vars, base_color = base_colors)
 
   return(heatmap_strips)
 }
 
 #' @keywords internal
-generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color, var_label, label_lookup, common_xlim) {
+generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color, var_label, common_xlim) {
   var_sym <- rlang::sym(varname)
   out_sym <- rlang::sym(outcome_var)
   x_min <- min(df[[outcome_var]], na.rm = TRUE)
   x_max <- max(df[[outcome_var]], na.rm = TRUE)
-  x_label_pos <- x_max + 0.01 * (x_max - x_min)
+  ref_level <- levels(df[[varname]])[1]
 
   heatmap_data <- df %>%
     dplyr::mutate(outcome_bin = cut(!!out_sym, breaks = breaks, include.lowest = TRUE)) %>%
@@ -108,25 +90,13 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
 
   heatmap_data <- add_variable_label_row(heatmap_data, varname, base_color, var_label)
 
-  label_data <- heatmap_data %>%
-    dplyr::filter(!is.na(!!var_sym), !is.na(prop)) %>%
-    dplyr::distinct(!!var_sym) %>%
-    dplyr::mutate(var = varname) %>%
-    dplyr::rename(level_name = !!var_sym) %>%
-    dplyr::left_join(label_lookup, by = c("var", "level_name" = "level")) %>%
-    dplyr::mutate(
-      label_text = ifelse(label_text == "Ref.", "italic('Ref.')", label_text),
-      !!var_sym := factor(level_name, levels = levels(heatmap_data[[varname]]))
-    )
-
-  ref_level <- levels(df[[varname]])[1]
-
   ggplot2::ggplot(heatmap_data, ggplot2::aes(y = !!var_sym, fill = prop)) +
-    ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax, ymin = as.numeric(!!var_sym) - 0.5,
-                                    ymax = as.numeric(!!var_sym) + 0.5), color = NA) +
-    ggplot2::geom_text(data = label_data,
-                       ggplot2::aes(y = !!var_sym, label = label_text),
-                       x = x_label_pos, inherit.aes = FALSE, hjust = 0, size = 3, parse = TRUE, na.rm = TRUE) +
+    ggplot2::geom_rect(
+      ggplot2::aes(xmin = xmin, xmax = xmax,
+                   ymin = as.numeric(!!var_sym) - 0.5,
+                   ymax = as.numeric(!!var_sym) + 0.5),
+      color = NA
+    ) +
     ggplot2::scale_fill_gradient(low = "white", high = base_color, na.value = NA) +
     ggplot2::scale_x_continuous(limits = common_xlim, expand = c(0, 0)) +
     ggplot2::scale_y_discrete(

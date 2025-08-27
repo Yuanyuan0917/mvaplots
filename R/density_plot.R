@@ -41,11 +41,25 @@ generate_density_plot <- function(data, outcome_var, outcome_var_label) {
   common_xlim <- c(x_min, x_max + x_buffer)
 
   # Create density plot
-  ggplot2::ggplot(df_dens, ggplot2::aes(x = x, y = y, color = type, fill = type)) +
-    ggplot2::geom_line(data = subset(df_dens, type == "All"), linewidth = 1) +
-    ggplot2::geom_area(data = subset(df_dens, type == "Significant"), alpha = 0.3, color = NA) +
-    ggplot2::scale_color_manual(values = c("steelblue", "tomato")) +
-    ggplot2::scale_fill_manual(values = c("steelblue", "tomato")) +
+  ggplot2::ggplot(df_dens, ggplot2::aes(x = x, y = y)) +
+    ggplot2::geom_line(
+      data = subset(df_dens, type == "All"),
+      ggplot2::aes(color = type),
+      linewidth = 1
+    ) +
+    ggplot2::geom_area(
+      data = subset(df_dens, type == "Significant"),
+      ggplot2::aes(fill = type),
+      alpha = 0.3, color = NA
+    ) +
+    ggplot2::scale_color_manual(
+      values = c("All" = "steelblue"),
+      labels = c("All" = "All")
+    ) +
+    ggplot2::scale_fill_manual(
+      values = c("Significant" = "tomato"),
+      labels = c("Significant" = "Significant")
+    ) +
     ggplot2::labs(
       x = outcome_var_label,
       y = NULL,
