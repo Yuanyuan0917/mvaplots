@@ -79,7 +79,7 @@ generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labe
   # Generate strips
   heatmap_strips <- Map(function(varname, base_color) {
     var_label <- variable_labels[[varname]]
-    generate_heatmap_strip(data, varname, outcome_var, breaks, base_color, var_label, label_lookup, common_xlim, x_min, common_xlim[2])
+    generate_heatmap_strip(data, varname, outcome_var, breaks, base_color, var_label, label_lookup, common_xlim, x_min, x_max)
   }, varname = strip_vars, base_color = base_colors)
 
   return(heatmap_strips)
@@ -131,7 +131,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
                        ggplot2::aes(y = !!var_sym, label = label_text),
                        x = x_label_pos, inherit.aes = FALSE, hjust = 0, size = 3, parse = TRUE, na.rm = TRUE) +
     ggplot2::scale_fill_gradient(low = "white", high = base_color, na.value = NA) +
-    ggplot2::scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
+    ggplot2::scale_x_continuous(limits = common_xlim, expand = c(0, 0)) +
     ggplot2::scale_y_discrete(
       labels = function(labs) {
         ifelse(
