@@ -105,7 +105,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
       !!var_sym := factor(!!var_sym, levels = levels(df[[varname]]))
     )
 
-  heatmap_data <- add_variable_label_row(heatmap_data, varname, base_color, var_label, x_min, common_xlim[2])
+  heatmap_data <- add_variable_label_row(heatmap_data, varname, base_color, var_label, x_min, x_max)
 
   label_data <- heatmap_data %>%
     dplyr::filter(!is.na(!!var_sym), !is.na(prop)) %>%
@@ -141,7 +141,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
       },
       expand = c(0, 0)
     ) +
-    ggplot2::coord_cartesian(xlim = common_xlim) +
+    ggplot2::coord_cartesian(xlim = common_xlim, clip = "off") +
     ggplot2::theme_minimal(base_size = 10) +
     ggplot2::theme(
       legend.position = "none",
@@ -172,3 +172,4 @@ add_variable_label_row <- function(data, varname, base_color, var_label, x_min, 
   for (col in setdiff(names(data), names(label_row))) label_row[[col]] <- NA
   dplyr::bind_rows(label_row[, names(data)], data)
 }
+
