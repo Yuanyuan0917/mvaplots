@@ -88,7 +88,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
       !!var_sym := factor(!!var_sym, levels = levels(df[[varname]]))
     )
 
-  heatmap_data <- add_variable_label_row(heatmap_data, varname, base_color, var_label)
+  heatmap_data <- add_variable_label_row(heatmap_data, varname, base_color, var_label, x_min, x_max)
 
   ggplot2::ggplot(heatmap_data, ggplot2::aes(y = !!var_sym, fill = prop)) +
     ggplot2::geom_rect(
@@ -138,4 +138,3 @@ add_variable_label_row <- function(data, varname, base_color, var_label, x_min, 
   for (col in setdiff(names(data), names(label_row))) label_row[[col]] <- NA
   dplyr::bind_rows(label_row[, names(data)], data)
 }
-
