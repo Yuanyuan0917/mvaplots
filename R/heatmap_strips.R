@@ -98,7 +98,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
       color = NA
     ) +
     ggplot2::scale_fill_gradient(low = "white", high = base_color, na.value = NA) +
-    ggplot2::scale_x_continuous(limits = common_xlim, expand = c(0, 0)) +
+    # ggplot2::scale_x_continuous(limits = common_xlim, expand = c(0, 0)) +
     ggplot2::scale_y_discrete(
       labels = function(labs) {
         ifelse(
