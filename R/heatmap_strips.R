@@ -105,7 +105,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
       !!var_sym := factor(!!var_sym, levels = levels(df[[varname]]))
     )
 
-  heatmap_data <- add_variable_label_row(heatmap_data, varname, base_color, var_label, x_min, x_max)
+  heatmap_data <- add_variable_label_row(heatmap_data, varname, base_color, var_label, x_min, common_xlim[2])
 
   label_data <- heatmap_data %>%
     dplyr::filter(!is.na(!!var_sym), !is.na(prop)) %>%
