@@ -91,6 +91,9 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
   out_sym <- rlang::sym(outcome_var)
   x_label_pos <- x_max + 0.01 * (x_max - x_min)
 
+  message(sprintf("common_xlim: [%.3f, %.3f], x_max=%.3f, x_label_pos=%.3f",
+                  common_xlim[1], common_xlim[2], x_max, x_label_pos))
+
   heatmap_data <- df %>%
     dplyr::mutate(outcome_bin = cut(!!out_sym, breaks = breaks, include.lowest = TRUE)) %>%
     dplyr::count(outcome_bin, !!var_sym) %>%
