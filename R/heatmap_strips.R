@@ -126,13 +126,16 @@ add_variable_label_row <- function(data, varname, base_color, var_label) {
   orig_levels <- levels(data[[varname]])
   new_levels <- rev(c("label", orig_levels))
   data[[varname]] <- factor(data[[varname]], levels = new_levels)
+
   label_row <- data.frame(
     outcome_bin = NA,
     prop = NA,
-    xmin = min(data$xmin, na.rm = TRUE),
-    xmax = max(data$xmax, na.rm = TRUE)
+    xmin = x_min,
+    xmax = x_max,
+    level = 0
   )
+
   label_row[[varname]] <- factor("label", levels = new_levels)
   for (col in setdiff(names(data), names(label_row))) label_row[[col]] <- NA
-  dplyr::bind_rows(label_row[, names(data)], data)
+  bind_rows(label_row[, names(data)], data)
 }
