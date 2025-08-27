@@ -96,6 +96,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
     dplyr::count(outcome_bin, !!var_sym) %>%
     dplyr::group_by(outcome_bin) %>%
     dplyr::mutate(prop = n / sum(n)) %>%
+    dplyr::ungroup() %>%
     tidyr::complete(outcome_bin, !!var_sym, fill = list(prop = 0)) %>%
     dplyr::mutate(
       bin_index = as.integer(outcome_bin),
