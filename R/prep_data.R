@@ -18,8 +18,8 @@
 #' str(prep)
 #'
 #' @export
-#' @importFrom dplyr mutate
-#' @importFrom magrittr %>%
+#' @import dplyr
+#' @import magrittr
 #' @importFrom utils read.csv
 prep_data <- function(use_case) {
   if (use_case == "hurricane") {
