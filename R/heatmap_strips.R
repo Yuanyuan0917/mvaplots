@@ -96,6 +96,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
     dplyr::count(outcome_bin, !!var_sym) %>%
     dplyr::group_by(outcome_bin) %>%
     dplyr::mutate(prop = n / sum(n)) %>%
+    dplyr::ungroup() %>%
     tidyr::complete(outcome_bin, !!var_sym, fill = list(prop = 0)) %>%
     dplyr::mutate(
       bin_index = as.integer(outcome_bin),
@@ -140,7 +141,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
       },
       expand = c(0, 0)
     ) +
-    ggplot2::coord_cartesian(xlim = common_xlim, clip = "off") +
+    ggplot2::coord_cartesian(xlim = common_xlim) +
     ggplot2::theme_minimal(base_size = 10) +
     ggplot2::theme(
       legend.position = "none",
