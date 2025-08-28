@@ -104,19 +104,13 @@ generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labe
 
 
 #' @keywords internal
-generate_heatmap_strip <- function(df, varname, outcome_var, breaks,
-                                   base_color, var_label, label_lookup,
-                                   common_xlim, x_min, x_max) {
-
+generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color, var_label, label_lookup, common_xlim, x_min, x_max) {
   var_sym <- rlang::sym(varname)
   out_sym <- rlang::sym(outcome_var)
-
-  x_label_pos <- x_max + 0.01 * (x_max - x_min)
-
-  message(sprintf(
-    "common_xlim: [%.3f, %.3f], x_max=%.3f, x_label_pos=%.3f",
-    common_xlim[1], common_xlim[2], x_max, x_label_pos
-  ))
+  x_label_pos <- common_xlim[2] - 0.05 * (common_xlim[2] - common_xlim[1])
+  df <- df %>% dplyr::mutate(!!var_sym := df[[varname]])
+  original_levels <- levels(df[[varname]])
+  first_level <- original_levels[1]
 
   heatmap_data <- df %>%
     dplyr::mutate(outcome_bin = cut(!!out_sym, breaks = breaks, include.lowest = TRUE)) %>%
@@ -127,14 +121,12 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks,
     tidyr::complete(outcome_bin, !!var_sym, fill = list(prop = 0)) %>%
     dplyr::mutate(
       bin_index = as.integer(outcome_bin),
-      xmin      = breaks[bin_index],
-      xmax      = breaks[bin_index + 1],
+      xmin = breaks[bin_index],
+      xmax = breaks[bin_index + 1],
       !!var_sym := factor(!!var_sym, levels = levels(df[[varname]]))
     )
 
-  heatmap_data <- add_variable_label_row(
-    heatmap_data, varname, base_color, var_label, x_min, x_max
-  )
+  heatmap_data <- add_variable_label_row(heatmap_data, varname, base_color, var_label, x_min, x_max)
 
   label_data <- heatmap_data %>%
     dplyr::filter(!is.na(!!var_sym), !is.na(prop)) %>%
@@ -144,51 +136,40 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks,
     dplyr::left_join(label_lookup, by = c("var", "level_name" = "level")) %>%
     dplyr::mutate(
       label_text = ifelse(label_text == "Ref.", "italic('Ref.')", label_text),
-      !!var_sym  := factor(level_name, levels = levels(heatmap_data[[varname]]))
+      !!var_sym := factor(level_name, levels = levels(heatmap_data[[varname]]))
     )
 
   ref_level <- levels(df[[varname]])[1]
 
   ggplot2::ggplot(heatmap_data, ggplot2::aes(y = !!var_sym, fill = prop)) +
-    ggplot2::geom_rect(
-      ggplot2::aes(
-        xmin = xmin, xmax = xmax,
-        ymin = as.numeric(!!var_sym) - 0.5,
-        ymax = as.numeric(!!var_sym) + 0.5
-      ),
-      color = NA
-    ) +
-    ggplot2::geom_text(
-      data        = label_data,
-      ggplot2::aes(y = !!var_sym, label = label_text),
-      x           = x_label_pos,
-      inherit.aes = FALSE,
-      hjust       = 0,
-      size        = 3,
-      parse       = TRUE,
-      na.rm       = TRUE
-    ) +
-    ggplot2::scale_fill_gradient(low = "white", high = base_color, na.value = NA) +
+    ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax,
+                                    ymin = as.numeric(!!var_sym) - 0.5,
+                                    ymax = as.numeric(!!var_sym) + 0.5),
+                       color = NA) +
+    ggplot2::geom_text(data = label_data,
+                       ggplot2::aes(y = !!var_sym, label = label_text),
+                       x = x_label_pos, inherit.aes = FALSE, hjust = 0, size = 3, parse = TRUE, na.rm = TRUE) +
+    ggplot2::scale_fill_gradient(low = "white", high = base_color, na.value = "white") +
     ggplot2::scale_x_continuous(limits = common_xlim, expand = c(0, 0)) +
     ggplot2::scale_y_discrete(
+      drop = FALSE,
       labels = function(labs) {
-        ifelse(
-          labs == "label", paste0("**", var_label, "**"),
-          ifelse(labs == ref_level, paste0("*", labs, "*"), labs)
-        )
+        labs <- ifelse(labs == "label", paste0("**", var_label, "**"),
+                       ifelse(labs == first_level, paste0("*", labs, "*"), labs))
+        return(labs)
       },
       expand = c(0, 0)
     ) +
     ggplot2::coord_cartesian(xlim = common_xlim, clip = "off") +
     ggplot2::theme_minimal(base_size = 10) +
     ggplot2::theme(
-      legend.position   = "none",
-      axis.text.x       = ggplot2::element_blank(),
-      axis.ticks.x      = ggplot2::element_blank(),
-      axis.title.y      = ggplot2::element_blank(),
-      axis.text.y       = ggtext::element_markdown(),
-      panel.grid        = ggplot2::element_blank(),
-      plot.margin       = ggplot2::margin(0, 20, 0, 10)
+      legend.position = "none",
+      axis.text.x = ggplot2::element_blank(),
+      axis.ticks.x = ggplot2::element_blank(),
+      axis.title.y = ggplot2::element_blank(),
+      axis.text.y = ggtext::element_markdown(),
+      panel.grid = ggplot2::element_blank(),
+      plot.margin = ggplot2::margin(0, 20, 0, 10)
     )
 }
 
