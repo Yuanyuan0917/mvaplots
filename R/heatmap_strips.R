@@ -19,7 +19,6 @@
 #'
 #' @export
 generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labels) {
-  # --- Binning Setup ---
   n_bins <- 20
   x_min <- min(data[[outcome_var]], na.rm = TRUE)
   x_max <- max(data[[outcome_var]], na.rm = TRUE)
@@ -27,17 +26,11 @@ generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labe
   common_xlim <- c(x_min, x_max + x_buffer)
   breaks <- seq(x_min, x_max, length.out = n_bins + 1)
 
-  # Assign outcome bin
-  bin_mids <- head(breaks, -1) + diff(breaks) / 2 # Calculates the midpoints of the bins for reference.
-  data <- data %>%
-    dplyr::mutate(outcome_bin = cut(.data[[outcome_var]], breaks = breaks, include.lowest = TRUE))
-
-  # --- Fit Linear Model ---
+  # Fit linear model for reordering factor levels
   reg_formula <- as.formula(paste(outcome_var, "~", paste(strip_vars, collapse = " + ")))
   lm_model <- lm(reg_formula, data = data)
   coefs <- coef(lm_model)
 
-  # Format coefficients
   tidy_coefs <- tibble::enframe(coefs, name = "term", value = "estimate") %>%
     dplyr::filter(term != "(Intercept)") %>%
     dplyr::rowwise() %>%
@@ -47,7 +40,7 @@ generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labe
     ) %>%
     dplyr::ungroup()
 
-  # Reorder factor levels based on effect size
+  # Reorder factor levels
   for (var in strip_vars) {
     ref_level <- levels(data[[var]])[1]
     coef_sub <- tidy_coefs %>% dplyr::filter(var == !!var & level != ref_level) %>%
@@ -55,7 +48,7 @@ generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labe
     data[[var]] <- factor(data[[var]], levels = unique(c(ref_level, coef_sub)))
   }
 
-  # Label formatting for plot text
+  # Label lookup for coefficients
   label_lookup <- tidy_coefs %>%
     dplyr::mutate(
       rounded = round(estimate, 2),
@@ -74,19 +67,16 @@ generate_heatmap_strips <- function(data, outcome_var, strip_vars, variable_labe
 
   label_lookup <- dplyr::bind_rows(label_lookup, ref_labels)
 
-  # --- Variable Influence Ordering ---
+  # Order variables by influence
   influence_scores <- tidy_coefs %>%
     dplyr::group_by(var) %>%
     dplyr::summarise(max_abs_effect = max(abs(estimate), na.rm = TRUE)) %>%
     dplyr::arrange(desc(max_abs_effect))
 
   strip_vars <- influence_scores$var
-
-  # Generates a set of perceptually uniform colors (using the `viridis` package) for use in the heatmaps.
-  # Each variable gets a unique color based on the number of `strip_vars`.
   base_colors <- viridis::viridis(length(strip_vars), option = "D")
 
-  # Iterates over the list of variables (`strip_vars`) and their associated colors (`base_colors`) to create heatmap strips for each.
+  # Generate strips
   heatmap_strips <- Map(function(varname, base_color) {
     var_label <- variable_labels[[varname]]
     generate_heatmap_strip(data, varname, outcome_var, breaks, base_color, var_label, label_lookup, common_xlim, x_min, x_max)
@@ -100,9 +90,6 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
   var_sym <- rlang::sym(varname)
   out_sym <- rlang::sym(outcome_var)
   x_label_pos <- x_max + 0.01 * (x_max - x_min)
-  df <- df %>% dplyr::mutate(!!var_sym := df[[varname]]) # Ensures the variable is included in the data frame for manipulation.
-  original_levels <- levels(df[[varname]]) # Extracts the original factor levels of the variable.
-  first_level <- original_levels[1] # Identifies the first (reference) level of the variable for labeling.
 
   heatmap_data <- df %>%
     dplyr::mutate(outcome_bin = cut(!!out_sym, breaks = breaks, include.lowest = TRUE)) %>%
@@ -134,21 +121,23 @@ generate_heatmap_strip <- function(df, varname, outcome_var, breaks, base_color,
   ref_level <- levels(df[[varname]])[1]
 
   ggplot2::ggplot(heatmap_data, ggplot2::aes(y = !!var_sym, fill = prop)) +
-    ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax,
+    ggplot2::geom_rect(
+      ggplot2::aes(xmin = xmin, xmax = xmax,
                    ymin = as.numeric(!!var_sym) - 0.5,
                    ymax = as.numeric(!!var_sym) + 0.5),
-      color = NA) +
+      color = NA
+    ) +
     ggplot2::geom_text(data = label_data,
                        ggplot2::aes(y = !!var_sym, label = label_text),
                        x = x_label_pos, inherit.aes = FALSE, hjust = 0, size = 3, parse = TRUE, na.rm = TRUE) +
     ggplot2::scale_fill_gradient(low = "white", high = base_color, na.value = NA) +
     ggplot2::scale_x_continuous(limits = common_xlim, expand = c(0, 0)) +
     ggplot2::scale_y_discrete(
-      drop = FALSE,
       labels = function(labs) {
-        labs <- ifelse(labs == "label", paste0("**", var_label, "**"),
-                       ifelse(labs == first_level, paste0("*", labs, "*"), labs))
-        return(labs)
+        ifelse(
+          labs == "label", paste0("**", var_label, "**"),
+          ifelse(labs == ref_level, paste0("*", labs, "*"), labs)
+        )
       },
       expand = c(0, 0)
     ) +
