@@ -116,7 +116,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var,
   ref_level <- levels(df[[varname]])[1]
 
   ggplot2::ggplot(heatmap_data, ggplot2::aes(y = !!var_sym, fill = prop)) +
-    ggplot2::geom_rect(aes(xmin = xmin, xmax = xmax, ymin = as.numeric(!!var_sym) - 0.5, ymax = as.numeric(!!var_sym) + 0.5), color = NA) +
+    ggplot2::geom_rect(ggplot2::aes(xmin = xmin, xmax = xmax, ymin = as.numeric(!!var_sym) - 0.5, ymax = as.numeric(!!var_sym) + 0.5), color = NA) +
     ggplot2::geom_text(data = label_data,
                        ggplot2::aes(y = !!var_sym, label = label_text),
                        x = x_label_pos, inherit.aes = FALSE,
