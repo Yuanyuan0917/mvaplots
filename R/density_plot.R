@@ -18,29 +18,23 @@
 #'
 #' @export
 generate_density_plot <- function(data, outcome_var, outcome_var_label) {
-  # Find range of outcome variable
   x_min <- min(data[[outcome_var]], na.rm = TRUE)
   x_max <- max(data[[outcome_var]], na.rm = TRUE)
 
-  # Density for all values
   dens_all <- stats::density(data[[outcome_var]], from = x_min, to = x_max)
 
-  # Density for significant values
   dens_sig <- stats::density(data[[outcome_var]][data$significant], from = x_min, to = x_max)
   sig_share <- mean(data$significant, na.rm = TRUE)
   dens_sig$y <- pmin(dens_sig$y * sig_share, dens_all$y)
 
-  # Transform to data frames
   dens_all_df <- data.frame(x = dens_all$x, y = dens_all$y, type = "All")
   dens_sig_df <- data.frame(x = dens_sig$x, y = dens_sig$y, type = "Significant")
   df_dens <- rbind(dens_all_df, dens_sig_df)
   df_dens$type <- factor(df_dens$type, levels = c("All", "Significant"))
 
-  # Set common x-axis
   x_buffer <- 0.1 * (x_max - x_min)
   common_xlim <- c(x_min, x_max + x_buffer)
 
-  # Create density plot
   ggplot2::ggplot(df_dens, ggplot2::aes(x = x, y = y)) +
     ggplot2::geom_line(
       data = subset(df_dens, type == "All"),
