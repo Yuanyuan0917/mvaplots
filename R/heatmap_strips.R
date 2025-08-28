@@ -115,8 +115,8 @@ generate_heatmap_strip <- function(df, varname, outcome_var,
 
   ref_level <- levels(df[[varname]])[1]
 
-  ggplot2::ggplot(heatmap_data, ggplot2::aes(x = (xmin + xmax)/2, y = !!var_sym, fill = prop)) +
-    ggplot2::geom_tile(ggplot2::aes(width = xmax - xmin, height = 1), color = NA) +
+  ggplot2::ggplot(heatmap_data, ggplot2::aes(y = !!var_sym, fill = prop)) +
+    ggplot2::geom_rect(aes(xmin = xmin, xmax = xmax, ymin = as.numeric(!!var_sym) - 0.5, ymax = as.numeric(!!var_sym) + 0.5), color = NA) +
     ggplot2::geom_text(data = label_data,
                        ggplot2::aes(y = !!var_sym, label = label_text),
                        x = x_label_pos, inherit.aes = FALSE,
@@ -148,7 +148,7 @@ generate_heatmap_strip <- function(df, varname, outcome_var,
 #' @keywords internal
 add_variable_label_row <- function(data, varname, base_color, var_label, x_min, x_max) {
   orig_levels <- levels(data[[varname]])
-  new_levels <- c("label", orig_levels)   # 保持原顺序，不要 rev()
+  new_levels <- rev(c("label", orig_levels))
   data[[varname]] <- factor(data[[varname]], levels = new_levels)
 
   label_row <- data.frame(

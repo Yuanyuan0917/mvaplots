@@ -17,10 +17,11 @@
 #' prep <- prep_data("hurricane")
 #' str(prep)
 #'
-#' @export
 #' @import dplyr
 #' @import magrittr
 #' @importFrom utils read.csv
+#' @export
+
 prep_data <- function(use_case) {
   if (use_case == "hurricane") {
     # --- Load and Prepare Data ---
